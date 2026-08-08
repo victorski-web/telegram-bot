@@ -6,7 +6,7 @@ from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 
 # Hardcoded Credentials
-BOT_TOKEN = "8902673939:AAGf7YaL9dL_HFwwmV8ua-mt62NT8-SwkUg"
+BOT_TOKEN = "8902673939:AAGhtm2I5_tPK7_4pwha0EhNNAV5wKz2_sE"
 ADMIN_ID = 7857565977
 
 # KeepAlive Web Server to satisfy Render health checks
