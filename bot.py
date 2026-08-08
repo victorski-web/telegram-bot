@@ -5,10 +5,17 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 
-BOT_TOKEN = os.getenv("8902673939:AAGf7YaL9dL_HFwwmV8ua-mt62NT8-SwkUg")
-ADMIN_ID = int(os.getenv("7857565977", "0"))
+# Safely fetch environment variables and strip quotes/spaces
+RAW_TOKEN = os.getenv("8902673939:AAGf7YaL9dL_HFwwmV8ua-mt62NT8-SwkUg", "")
+BOT_TOKEN = RAW_TOKEN.strip().strip('"').strip("'")
 
-# Proper Health Check Server for Render Web Service
+RAW_ADMIN = os.getenv("7857565977", "0").strip().strip('"').strip("'")
+ADMIN_ID = int(RAW_ADMIN) if RAW_ADMIN.isdigit() else 0
+
+if not BOT_TOKEN:
+    print("❌ ERROR: BOT_TOKEN is missing or empty in Environment Variables!")
+
+# KeepAlive Web Server
 class KeepAliveHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
@@ -17,7 +24,6 @@ class KeepAliveHandler(BaseHTTPRequestHandler):
         self.wfile.write(b"Bot is alive")
 
     def log_message(self, format, *args):
-        # Silence HTTP health check logs to keep log output clean
         return
 
 def run_web_server():
@@ -25,7 +31,6 @@ def run_web_server():
     server = HTTPServer(('0.0.0.0', port), KeepAliveHandler)
     server.serve_forever()
 
-# Start web server in background thread
 threading.Thread(target=run_web_server, daemon=True).start()
 
 # Database Setup
@@ -85,6 +90,9 @@ async def winner(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"❌ User @{target_username} not found in database.")
 
 def main():
+    if not BOT_TOKEN:
+        raise ValueError("BOT_TOKEN variable is completely missing from Render environment!")
+        
     app = Application.builder().token(BOT_TOKEN).build()
     app.add_handler(CommandHandler("winner", winner))
     print("Bot is running...")
